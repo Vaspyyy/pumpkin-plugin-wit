@@ -25,7 +25,7 @@ interface java-packets {
     keep-alive-id: s64,
   }
   record config-s-known-packs {
-    known-pack-count: s32,
+    known-packs: list<string>,
   }
   record config-s-plugin-message {
     channel: string,
@@ -124,6 +124,12 @@ interface java-packets {
   record s-custom-payload {
     channel: string,
     data: list<u8>,
+  }
+  record s-debug-sample-subscription {
+    sample-type: s32,
+  }
+  record s-debug-subscription-request {
+    sample-type: s32,
   }
   record s-interact {
     entity-id: s32,
@@ -308,6 +314,9 @@ interface java-packets {
   record config-c-cookie-request {
     key: string,
   }
+  record config-c-feature-flags {
+    features: list<string>,
+  }
   record config-c-known-packs {
     known-packs: list<string>,
   }
@@ -433,6 +442,10 @@ interface java-packets {
     source-cause-id: s32,
     source-direct-id: s32,
     source-position: option<tuple<f64, f64, f64>>,
+  }
+  record c-debug-sample {
+    sample: list<s64>,
+    sample-type: s32,
   }
   record c-play-disconnect {
     reason: string,
@@ -691,6 +704,10 @@ interface java-packets {
   record c-set-cursor-item {
     stack: string,
   }
+  record c-set-entity-link {
+    attached-entity-id: s32,
+    holding-entity-id: s32,
+  }
   record c-set-equipment {
     entity-id: s32,
     equipment: list<string>,
@@ -894,6 +911,8 @@ interface java-packets {
     s-cookie-response(s-cookie-response),
     s-custom-click-action(s-custom-click-action),
     s-custom-payload(s-custom-payload),
+    s-debug-sample-subscription(s-debug-sample-subscription),
+    s-debug-subscription-request(s-debug-subscription-request),
     s-interact(s-interact),
     s-jigsaw-generate(s-jigsaw-generate),
     s-keep-alive(s-keep-alive),
@@ -939,6 +958,7 @@ interface java-packets {
     config-c-config-clear-dialog,
     config-c-config-disconnect(config-c-config-disconnect),
     config-c-cookie-request(config-c-cookie-request),
+    config-c-feature-flags(config-c-feature-flags),
     config-c-finish-config,
     config-c-known-packs(config-c-known-packs),
     config-c-plugin-message(config-c-plugin-message),
@@ -975,6 +995,7 @@ interface java-packets {
     c-play-cookie-request(c-play-cookie-request),
     c-custom-payload(c-custom-payload),
     c-damage-event(c-damage-event),
+    c-debug-sample(c-debug-sample),
     c-play-disconnect(c-play-disconnect),
     c-disguised-chat-message(c-disguised-chat-message),
     c-display-objective(c-display-objective),
@@ -1024,6 +1045,7 @@ interface java-packets {
     c-set-container-property(c-set-container-property),
     c-set-container-slot(c-set-container-slot),
     c-set-cursor-item(c-set-cursor-item),
+    c-set-entity-link(c-set-entity-link),
     c-set-equipment(c-set-equipment),
     c-set-experience(c-set-experience),
     c-set-health(c-set-health),

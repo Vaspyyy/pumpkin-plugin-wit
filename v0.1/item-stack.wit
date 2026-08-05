@@ -77,14 +77,13 @@ interface item-stack {
         /// Sets the custom name of this item stack.
         set-custom-name: func(name: option<text-component>);
 
-        /// Sets a plugin-owned NBT value in minecraft:custom_data.
+        /// Sets a namespaced custom data value on this item stack.
         set-custom-data: func(namespace: string, key: string, value: nbt-tree);
-        /// Returns a plugin-owned NBT value from minecraft:custom_data.
+        /// Returns a namespaced custom data value from this item stack, if set.
         get-custom-data: func(namespace: string, key: string) -> option<nbt-tree>;
-
-        /// Removes one plugin-owned custom data key from minecraft:custom_data.
+        /// Removes a namespaced custom data value from this item stack.
         remove-custom-data: func(namespace: string, key: string);
-        /// Returns whether a plugin-owned custom data key exists in minecraft:custom_data.
+        /// Returns whether this item stack has a namespaced custom data value.
         has-custom-data: func(namespace: string, key: string) -> bool;
 
         /// Returns all data components on this item stack.

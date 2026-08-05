@@ -11,6 +11,26 @@ interface player {
     use java-packets.{clientbound-packet as java-packet};
     use bedrock-packets.{clientbound-packet as bedrock-packet};
     use uuid.{uuid};
+    use status-effect.{status-effect-type, status-effect-instance};
+
+    /// Represents per-player weather condition overrides.
+    enum player-weather {
+        clear,
+        downfall,
+    }
+
+    /// Types of projectiles that can be launched by a player.
+    enum projectile-type {
+        arrow,
+        snowball,
+        egg,
+        ender-pearl,
+        splash-potion,
+        fireball,
+        small-fireball,
+        trident,
+        wind-charge,
+    }
 
     /// Various abilities a player can have.
     record player-abilities {
@@ -637,6 +657,50 @@ interface player {
         /// Transfers the player to another server.
         transfer: func (host: string, port: u16);
 
+        // Status Effects
+
+        /// Gives a status effect to the player.
+        add-effect: func(effect: status-effect-instance);
+        /// Removes a status effect from the player.
+        remove-effect: func(effect: status-effect-type);
+        /// Clears all active status effects from the player.
+        clear-effects: func();
+        /// Checks if a status effect is currently applied to the player.
+        has-effect: func(effect: status-effect-type) -> bool;
+        /// Returns the status effect instance applied to the player, if any.
+        get-effect: func(effect: status-effect-type) -> option<status-effect-instance>;
+        /// Returns all status effects currently applied to the player.
+        get-active-effects: func() -> list<status-effect-instance>;
+
+        // Health & Damage
+
+        /// Heals the player by a specified amount.
+        heal: func(amount: f32);
+        /// Deals damage to the player by a specified amount.
+        damage: func(amount: f32);
+        /// Kills the player instantly.
+        kill: func();
+
+        // Cooldowns
+
+        /// Starts an item cooldown for a specific item group name.
+        start-cooldown: func(group: string, duration-ticks: s32);
+        /// Returns the cooldown progress (0.0 to 1.0) for a specific item group.
+        get-cooldown: func(group: string) -> f32;
+        /// Checks if a specific item group is currently on cooldown.
+        is-on-cooldown: func(group: string) -> bool;
+
+        // Abilities & Flight
+
+        /// Sets whether the player is allowed to fly.
+        set-allow-flight: func(allowed: bool);
+        /// Sets the player's flying speed.
+        set-fly-speed: func(speed: f32);
+        /// Sets the player's walking speed.
+        set-walk-speed: func(speed: f32);
+        /// Sets whether the player is invulnerable to damage.
+        set-invulnerable: func(invulnerable: bool);
+
         // Inventory
 
         /// Returns the index of the currently selected hotbar slot (0-8).
@@ -719,6 +783,46 @@ interface player {
         get-skin-parts: func() -> skin-parts;
         /// Sets which skin parts are visible.
         set-skin-parts: func(parts: skin-parts);
+
+        // Per-Player Environment & Overrides
+
+        /// Overrides the time of day shown to this player.
+        set-player-time: func(time: u64, relative: bool);
+        /// Resets the player's time to sync with the server world time.
+        reset-player-time: func();
+        /// Returns the custom time set for this player, if any.
+        get-player-time: func() -> option<u64>;
+        /// Checks if the custom player time is relative to the world time.
+        is-player-time-relative: func() -> bool;
+
+        /// Overrides the weather condition shown to this player.
+        set-player-weather: func(weather: player-weather);
+        /// Resets the player's weather to match the server world weather.
+        reset-player-weather: func();
+        /// Returns the custom weather set for this player, if any.
+        get-player-weather: func() -> option<player-weather>;
+
+        /// Sets the position where the player's compass points.
+        set-compass-target: func(pos: position);
+        /// Returns the position where the player's compass currently points.
+        get-compass-target: func() -> position;
+
+        /// Sets the player's custom respawn / bed location.
+        set-respawn-location: func(pos: position);
+        /// Returns the player's custom respawn / bed location, if set.
+        get-respawn-location: func() -> option<position>;
+
+        /// Hides another player from this player's view (vanish).
+        hide-player: func(other: player);
+        /// Shows a previously hidden player to this player.
+        show-player: func(other: player);
+        /// Checks if this player can see another specified player.
+        can-see: func(other: player) -> bool;
+
+        /// Raycasts from the player's eyes to find the block being targeted.
+        get-target-block: func(max-distance: u32) -> option<position>;
+        /// Launches a projectile from the player's eyes in their line of sight.
+        launch-projectile: func(%type: projectile-type) -> option<entity>;
 
         /// Returns a Java-specific player handle, if the player is connected via Java Edition.
         ///

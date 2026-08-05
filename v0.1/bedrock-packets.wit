@@ -107,11 +107,18 @@ interface bedrock-packets {
     tick: s64,
     delta: tuple<f64, f64, f64>,
     block-actions: option<list<string>>,
+    item-interaction: option<string>,
+    item-stack-request: option<string>,
     vehicle-rotation: option<string>,
     vehicle-unique-id: option<s64>,
     analog-move: string,
     camera-orientation: tuple<f64, f64, f64>,
     raw-move: string,
+  }
+  record s-player-hotbar {
+    selected-slot: s32,
+    container-id: u8,
+    select-slot: bool,
   }
   record s-connected-ping {
     time: s64,
@@ -139,6 +146,11 @@ interface bedrock-packets {
     client-guid: s64,
   }
   record s-unconnected-ping {
+    time: s64,
+    magic: string,
+    client-guid: s64,
+  }
+  record s-unconnected-ping-open-connections {
     time: s64,
     magic: string,
     client-guid: s64,
@@ -235,6 +247,12 @@ interface bedrock-packets {
     boss-entity-id: s64,
     action: string,
   }
+  record c-change-dimension {
+    dimension: s32,
+    position: tuple<f64, f64, f64>,
+    respawn: bool,
+    has-loading-screen-id: bool,
+  }
   record c-chunk-radius-update {
     chunk-radius: s32,
   }
@@ -299,6 +317,14 @@ interface bedrock-packets {
     event-id: s32,
     position: tuple<f64, f64, f64>,
     data: s32,
+  }
+  record c-level-sound-event {
+    sound-id: s32,
+    position: tuple<f64, f64, f64>,
+    extra-data: s32,
+    entity-type: string,
+    is-baby-mob: bool,
+    is-global: bool,
   }
   record c-modal-form-request {
     form-id: s32,
@@ -379,6 +405,22 @@ interface bedrock-packets {
     requested-timestamp: s64,
     timestamp: s64,
   }
+  record c-already-connected {
+    magic: string,
+    server-guid: s64,
+  }
+  record c-no-free-incoming-connections {
+    magic: string,
+    server-guid: s64,
+  }
+  record c-connection-banned {
+    magic: string,
+    server-guid: s64,
+  }
+  record c-ip-recently-connected {
+    magic: string,
+    server-guid: s64,
+  }
   record c-incompatible-protocol-version {
     protocol-version: u8,
     magic: string,
@@ -442,16 +484,28 @@ interface bedrock-packets {
     synced-properties: string,
     tick: s64,
   }
+  record c-set-actor-link {
+    link: string,
+  }
   record c-set-actor-motion {
     target-runtime-id: s64,
     motion: tuple<f64, f64, f64>,
     tick: s64,
+  }
+  record c-set-difficulty {
+    difficulty: s32,
   }
   record c-set-health {
     health: s32,
   }
   record c-set-player-gamemode {
     gamemode: string,
+  }
+  record c-set-spawn-position {
+    spawn-type: s32,
+    position: tuple<s32, s32, s32>,
+    dimension: s32,
+    spawn-position: tuple<s32, s32, s32>,
   }
   record c-set-time {
     time: s32,
@@ -465,6 +519,10 @@ interface bedrock-packets {
     xuid: string,
     platform-online-id: string,
     filtered-message: string,
+  }
+  record c-show-credits {
+    player-runtime-id: s64,
+    status: s32,
   }
   record c-start-game {
     entity-id: s64,
@@ -529,6 +587,7 @@ interface bedrock-packets {
     s-animate(s-animate),
     s-block-pick-request(s-block-pick-request),
     s-client-cache-status(s-client-cache-status),
+    s-client-to-server-handshake,
     s-command-request(s-command-request),
     s-container-close(s-container-close),
     s-emote(s-emote),
@@ -542,13 +601,16 @@ interface bedrock-packets {
     s-modal-form-response(s-modal-form-response),
     s-player-action(s-player-action),
     s-player-auth-input(s-player-auth-input),
+    s-player-hotbar(s-player-hotbar),
     s-connected-ping(s-connected-ping),
     s-connection-request(s-connection-request),
     s-new-incoming-connection(s-new-incoming-connection),
     s-disconnect,
+    s-connection-lost,
     s-open-connection-request1(s-open-connection-request1),
     s-open-connection-request2(s-open-connection-request2),
     s-unconnected-ping(s-unconnected-ping),
+    s-unconnected-ping-open-connections(s-unconnected-ping-open-connections),
     s-request-ability(s-request-ability),
     s-request-chunk-radius(s-request-chunk-radius),
     s-request-network-settings(s-request-network-settings),
@@ -564,6 +626,7 @@ interface bedrock-packets {
     c-add-player(c-add-player),
     c-available-commands(c-available-commands),
     c-boss-event(c-boss-event),
+    c-change-dimension(c-change-dimension),
     c-chunk-radius-update(c-chunk-radius-update),
     c-container-open(c-container-open),
     c-correct-player-move(c-correct-player-move),
@@ -578,6 +641,7 @@ interface bedrock-packets {
     c-item-stack-response(c-item-stack-response),
     c-level-chunk(c-level-chunk),
     c-level-event(c-level-event),
+    c-level-sound-event(c-level-sound-event),
     c-modal-form-request(c-modal-form-request),
     c-move-actor-absolute(c-move-actor-absolute),
     c-move-actor-delta(c-move-actor-delta),
@@ -589,6 +653,11 @@ interface bedrock-packets {
     c-player-list(c-player-list),
     c-connected-pong(c-connected-pong),
     c-connection-request-accepted(c-connection-request-accepted),
+    c-already-connected(c-already-connected),
+    c-no-free-incoming-connections(c-no-free-incoming-connections),
+    c-connection-banned(c-connection-banned),
+    c-ip-recently-connected(c-ip-recently-connected),
+    c-disconnect,
     c-incompatible-protocol-version(c-incompatible-protocol-version),
     c-open-connection-reply1(c-open-connection-reply1),
     c-open-connection-reply2(c-open-connection-reply2),
@@ -600,11 +669,15 @@ interface bedrock-packets {
     c-set-score(c-set-score),
     c-remove-objective(c-remove-objective),
     c-set-actor-data(c-set-actor-data),
+    c-set-actor-link(c-set-actor-link),
     c-set-actor-motion(c-set-actor-motion),
+    c-set-difficulty(c-set-difficulty),
     c-set-health(c-set-health),
     c-set-player-gamemode(c-set-player-gamemode),
+    c-set-spawn-position(c-set-spawn-position),
     c-set-time(c-set-time),
     c-set-title(c-set-title),
+    c-show-credits(c-show-credits),
     c-start-game(c-start-game),
     c-take-item-actor(c-take-item-actor),
     c-transfer(c-transfer),

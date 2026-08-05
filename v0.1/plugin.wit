@@ -8,6 +8,7 @@ world plugin {
     use event.{event};
     use server.{server as server-instance};
     use command.{command-sender, consumed-args, command-error};
+    use %world.{entity};
 
     // --- Host-provided imports ---
 
@@ -39,6 +40,8 @@ world plugin {
     import forms;
     /// Provides Java Edition dialogs.
     import java-dialogs;
+    /// Provides status effect types and instances.
+    import status-effect;
 
     // --- Plugin-provided exports ---
 
@@ -65,4 +68,10 @@ world plugin {
 
     /// Dispatches a scheduled task execution to the plugin.
     export handle-task: func(handler-id: u32, server: server-instance);
+
+    export handle-ai-goal-can-start: func(goal-id: u32, server: server-instance, entity: entity) -> bool;
+    export handle-ai-goal-should-continue: func(goal-id: u32, server: server-instance, entity: entity) -> bool;
+    export handle-ai-goal-start: func(goal-id: u32, server: server-instance, entity: entity);
+    export handle-ai-goal-tick: func(goal-id: u32, server: server-instance, entity: entity);
+    export handle-ai-goal-stop: func(goal-id: u32, server: server-instance, entity: entity);
 }
